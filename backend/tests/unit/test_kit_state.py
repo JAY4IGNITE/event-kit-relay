@@ -6,18 +6,37 @@ be enabled once the domain logic is implemented.
 import pytest
 
 
-@pytest.mark.skip(reason="scaffold: implement EventKit state transitions")
+from app.domain.entities.event_kit import EventKit, EquipmentSlot
+from app.domain.states.kit_state import AvailableState, ReservedState
+from app.domain.enums import KitId
+from app.domain.errors.exceptions import IllegalKitTransitionError
+
+
 def test_available_kit_can_be_reserved():
-    ...
+    kit = EventKit()
+    kit.id = KitId("k1")
+    kit.slots = []
+    kit.version = 1
+    kit._set_state(AvailableState())
+    kit.reserve()
+    assert kit.status.value == "RESERVED"
 
 
-@pytest.mark.skip(reason="scaffold: implement EventKit state transitions")
 def test_illegal_transition_raises():
-    # e.g. checkout() on an AVAILABLE (not RESERVED) kit must raise
-    # IllegalKitTransitionError
-    ...
+    kit = EventKit()
+    kit.id = KitId("k1")
+    kit.slots = []
+    kit.version = 1
+    kit._set_state(AvailableState())
+    with pytest.raises(IllegalKitTransitionError):
+        kit.checkout()
 
 
-@pytest.mark.skip(reason="scaffold: implement soft-hold release")
 def test_reserved_kit_release_returns_to_available():
-    ...
+    kit = EventKit()
+    kit.id = KitId("k1")
+    kit.slots = []
+    kit.version = 1
+    kit._set_state(ReservedState())
+    kit.release()
+    assert kit.status.value == "AVAILABLE"

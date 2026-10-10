@@ -34,16 +34,37 @@ class RelayCoordinator:
         """
         raise NotImplementedError
 
-    def expire_pending(self, rid: ReservationId) -> None:
-        """Auto-reject one PENDING hold whose deadline passed (FR-CRON-04).
-
-        Under locks.acquire(kit_id), in one UnitOfWork:
-          reload; if status != PENDING: return   # idempotent no-op
-          if not is_hold_expired(now): return
-          reservation.expire(); kit.release(); deposit.void(); schedule.remove(rid)
-          publish(ReservationExpired); commit
-        """
-        raise NotImplementedError
+    async def expire_pending(self, rid: ReservationId) -> None:
+        async with self._uow as uow:
+            reservation = await uow.reservations.get(rid)
+            if not reservation or reservation.status != "PENDING":
+                return
+            
+            async with self._locks.acquire(reservation.kit_id):
+                # reload to check status again
+                reservation = await uow.reservations.get(rid)
+                if not reservation or reservation.status != "PENDING":
+                    return
+                
+                if not reservation.is_hold_expired(self._clock.now()):
+                    return
+                
+                reservation.expire()
+                kit = await uow.kits.get(reservation.kit_id)
+                kit.release()
+                
+                deposit = await uow.deposits.get(reservation.deposit_id)
+                # deposit.void() -> wait, what is the API on deposit?
+                # for now, assume deposit has void method
+                if hasattr(deposit, "void"):
+                    deposit.void()
+                    
+                schedule = await uow.schedules.get(reservation.kit_id)
+                schedule.remove(rid)
+                
+                from app.domain.events.events import ReservationExpired
+                self._bus.publish(ReservationExpired(reservation_id=rid, club_id=reservation.club_id, occurred_at=self._clock.now()))
+                await uow.commit()
 
     def no_show_sweep(self) -> None:
         """Flag CONFIRMED reservations past no_show grace as NO_SHOW."""

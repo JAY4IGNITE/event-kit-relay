@@ -12,20 +12,20 @@ class TimeSlot:
     end: datetime
 
     def duration(self) -> timedelta:
-        raise NotImplementedError
+        return self.end - self.start
 
     def overlaps(self, other: "TimeSlot") -> bool:
-        raise NotImplementedError
+        return max(self.start, other.start) < min(self.end, other.end)
 
     def gap_to(self, later: "TimeSlot") -> timedelta:
-        raise NotImplementedError
+        return later.start - self.end
 
     def shifted_to(self, new_start: datetime) -> "TimeSlot":
         """Return a new slot starting at ``new_start`` preserving duration."""
-        raise NotImplementedError
+        return TimeSlot(start=new_start, end=new_start + self.duration())
 
     def contains(self, t: datetime) -> bool:
-        raise NotImplementedError
+        return self.start <= t <= self.end
 
 
 @dataclass(frozen=True)
@@ -34,13 +34,13 @@ class Money:
     currency: str = "INR"
 
     def __add__(self, other: "Money") -> "Money":
-        raise NotImplementedError
+        return Money(self.amount + other.amount, self.currency)
 
     def __sub__(self, other: "Money") -> "Money":
-        raise NotImplementedError
+        return Money(self.amount - other.amount, self.currency)
 
     def percentage(self, pct: Decimal) -> "Money":
-        raise NotImplementedError
+        return Money(self.amount * (pct / Decimal(100)), self.currency)
 
 
 @dataclass(frozen=True)
@@ -51,7 +51,7 @@ class TurnaroundWindow:
 
     def window_after(self, actual_return: datetime) -> TimeSlot:
         """Return ``[actual_return, actual_return + duration]``."""
-        raise NotImplementedError
+        return TimeSlot(start=actual_return, end=actual_return + self.duration)
 
 
 @dataclass(frozen=True)
@@ -62,7 +62,7 @@ class HoldPolicy:
     no_show_grace: timedelta = field(default_factory=lambda: timedelta(minutes=15))
 
     def pending_deadline(self, created_at: datetime) -> datetime:
-        raise NotImplementedError
+        return created_at + self.pending_ttl
 
     def no_show_deadline(self, effective_start: datetime) -> datetime:
-        raise NotImplementedError
+        return effective_start + self.no_show_grace

@@ -8,6 +8,7 @@ dependencies = [
     "uvicorn[standard]==0.32.1",
     "sqlalchemy==2.0.36",
     "asyncpg==0.30.0",
+    "aiosqlite==0.20.0",
     "alembic==1.14.0",
     "pydantic==2.10.3",
     "pydantic-settings==2.6.1",
@@ -31,6 +32,10 @@ target-version = "py311"
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+asyncio_default_fixture_loop_scope = "function"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
 
 [build-system]
 requires = ["setuptools>=68"]

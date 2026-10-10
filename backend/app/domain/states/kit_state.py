@@ -46,41 +46,41 @@ class AvailableState(KitState):
     tag = KitStatusTag.AVAILABLE
 
     def reserve(self, kit: "EventKit") -> None:
-        raise NotImplementedError  # -> ReservedState
+        kit._set_state(ReservedState())
 
 
 class ReservedState(KitState):
     tag = KitStatusTag.RESERVED
 
     def checkout(self, kit: "EventKit") -> None:
-        raise NotImplementedError  # -> CheckedOutState
+        kit._set_state(CheckedOutState())
 
     def release(self, kit: "EventKit") -> None:
-        raise NotImplementedError  # -> AvailableState (soft hold released)
+        kit._set_state(AvailableState())
 
 
 class CheckedOutState(KitState):
     tag = KitStatusTag.CHECKED_OUT
 
     def mark_returned(self, kit: "EventKit") -> None:
-        raise NotImplementedError  # -> AwaitingInspectionState
+        kit._set_state(AwaitingInspectionState())
 
 
 class AwaitingInspectionState(KitState):
     tag = KitStatusTag.AWAITING_INSPECTION
 
     def pass_inspection(self, kit: "EventKit") -> None:
-        raise NotImplementedError  # -> AvailableState
+        kit._set_state(AvailableState())
 
     def fail_inspection(self, kit: "EventKit") -> None:
-        raise NotImplementedError  # -> UnderMaintenanceState
+        kit._set_state(UnderMaintenanceState())
 
 
 class UnderMaintenanceState(KitState):
     tag = KitStatusTag.UNDER_MAINTENANCE
 
     def restore(self, kit: "EventKit") -> None:
-        raise NotImplementedError  # -> AvailableState
+        kit._set_state(AvailableState())
 
 
 class RetiredState(KitState):

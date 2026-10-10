@@ -78,6 +78,7 @@ class ReservationModel(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     hold_expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     idempotency_key: Mapped[str] = mapped_column(String, unique=True)
+    required_types: Mapped[list[str]] = mapped_column(JSON, default=list)
     deposit_id: Mapped[str | None] = mapped_column(String, nullable=True)
     version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     __mapper_args__ = {"version_id_col": version}

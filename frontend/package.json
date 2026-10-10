@@ -12,16 +12,23 @@
     "gen:api": "openapi-typescript http://localhost:8000/openapi.json -o src/api/schema.d.ts"
   },
   "dependencies": {
+    "@fontsource-variable/geist": "^5.1.0",
+    "@fontsource-variable/geist-mono": "^5.1.0",
+    "@phosphor-icons/react": "^2.1.7",
     "@tanstack/react-query": "5.62.7",
+    "motion": "^11.15.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.28.0"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.0.0",
     "@types/react": "18.3.17",
     "@types/react-dom": "18.3.5",
     "@vitejs/plugin-react": "4.3.4",
     "openapi-typescript": "7.4.4",
+    "react-refresh": "^0.19.0",
+    "tailwindcss": "^4.0.0",
     "typescript": "5.7.2",
     "vite": "6.0.3",
     "vitest": "2.1.8"

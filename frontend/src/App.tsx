@@ -1,27 +1,32 @@
-import { KitList } from "@/features/inventory/KitList";
-import { ReservationPanel } from "@/features/reservations/ReservationPanel";
+import { lazy, Suspense } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Landing } from "@/routes/Landing";
+
+// Keep the dashboard (and its data layer) out of the landing page's initial chunk.
+const Dashboard = lazy(() =>
+  import("@/routes/Dashboard").then((m) => ({ default: m.Dashboard })),
+);
 
 /**
- * Root shell. Two dashboards share this page in v1:
- *  - Organizer: kit inventory + inspection actions
- *  - Club: create/confirm reservations
- * Routing can be split later with react-router-dom.
+ * Two surfaces share one shell language:
+ *   /      marketing landing page (public entry point)
+ *   /app   organizer + club dashboards, wrapped in the app shell
  */
 export function App() {
   return (
-    <main style={{ fontFamily: "system-ui", maxWidth: 960, margin: "2rem auto", padding: "0 1rem" }}>
-      <h1>College Event Kit Relay</h1>
-      <p style={{ color: "#555" }}>
-        Shared AV kits relayed between clubs with a mandatory 15-minute inspection window.
-      </p>
-      <section>
-        <h2>Kits</h2>
-        <KitList />
-      </section>
-      <section>
-        <h2>Reservations</h2>
-        <ReservationPanel />
-      </section>
-    </main>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route
+          path="/app"
+          element={
+            <Suspense fallback={<div className="min-h-dvh bg-bg" />}>
+              <Dashboard />
+            </Suspense>
+          }
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }

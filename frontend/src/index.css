@@ -1,0 +1,103 @@
+@import "tailwindcss";
+
+/*
+  Theme lock: ONE theme at a time, driven by [data-theme] on <html>.
+  Default is resolved from system / localStorage by the no-flash script in index.html.
+  The dark: variant keys off that attribute so a manual toggle works.
+*/
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* ---- Semantic tokens (values swap per theme) ------------------------------ */
+:root,
+[data-theme="light"] {
+  --bg: #faf9f6;          /* warm off-white, never pure #fff */
+  --surface: #ffffff;
+  --surface-2: #f1efe9;
+  --border: #e6e2d9;
+  --fg: #1b1a16;          /* warm near-black, never pure #000 */
+  --fg-muted: #6a665c;
+  --fg-faint: #938f84;
+  --accent: #c67c12;      /* signal amber, text-safe on light surfaces */
+  --accent-hi: #e59a2b;   /* brighter amber for fills / markers */
+  --accent-ink: #1b1a16;  /* text that sits on an accent fill */
+  --ring: #c67c12;
+  --shadow: 20px 20px 60px rgb(27 26 22 / 0.08);
+}
+
+[data-theme="dark"] {
+  --bg: #0b0b0d;          /* near-black */
+  --surface: #141417;
+  --surface-2: #1b1b20;
+  --border: #2a2a31;
+  --fg: #f3f1ec;
+  --fg-muted: #a3a099;
+  --fg-faint: #6f6c66;
+  --accent: #f2b351;      /* amber reads brighter on near-black */
+  --accent-hi: #f2b351;
+  --accent-ink: #16140d;
+  --ring: #f2b351;
+  --shadow: 0 24px 70px rgb(0 0 0 / 0.5);
+}
+
+/* ---- Map tokens onto Tailwind's color + font scales ----------------------- */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-faint: var(--fg-faint);
+  --color-accent: var(--accent);
+  --color-accent-hi: var(--accent-hi);
+  --color-accent-ink: var(--accent-ink);
+}
+
+@theme {
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+  }
+  body {
+    background-color: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv01", "ss03";
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: var(--accent-hi);
+    color: var(--accent-ink);
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+}
+
+/*
+  Shape system (locked):
+    panels / cards  -> rounded-2xl (16px)
+    buttons / pills -> rounded-full
+    inputs          -> rounded-lg  (8px)
+  Honor these three everywhere; do not mix in other radii.
+*/
+
+/* Hatched fill for the inspection-window gap in the relay diagram. */
+.inspect-hatch {
+  background-image: repeating-linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--accent-hi) 55%, transparent) 0 2px,
+    transparent 2px 7px
+  );
+}

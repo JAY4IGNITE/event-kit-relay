@@ -3,17 +3,23 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import AwareDatetime, BaseModel, Field, model_validator
 
 from app.domain.enums import EquipmentType
 
 
 class CreateReservationIn(BaseModel):
-    club_id: str
-    required_types: list[EquipmentType]
-    start: datetime
-    end: datetime
-    idempotency_key: str
+    club_id: str = Field(min_length=1, max_length=100)
+    required_types: list[EquipmentType] = Field(min_length=1, max_length=20)
+    start: AwareDatetime
+    end: AwareDatetime
+    idempotency_key: str = Field(min_length=1, max_length=100)
+
+    @model_validator(mode="after")
+    def valid_slot(self) -> "CreateReservationIn":
+        if self.end <= self.start:
+            raise ValueError("End must be after start")
+        return self
 
 
 class ReservationOut(BaseModel):

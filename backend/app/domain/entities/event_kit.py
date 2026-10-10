@@ -18,7 +18,7 @@ class EquipmentSlot:
 
     def is_satisfied(self) -> bool:
         """Slot is satisfied iff an item is present AND usable."""
-        raise NotImplementedError
+        return self.item is not None and self.item.status.is_usable()
 
 
 class EventKit:
@@ -31,41 +31,41 @@ class EventKit:
 
     # ---- queries ----
     def is_complete(self) -> bool:
-        raise NotImplementedError
+        return all(slot.item is not None for slot in self.slots)
 
     def all_usable(self) -> bool:
-        raise NotImplementedError
+        return all(slot.is_satisfied() for slot in self.slots)
 
     def is_reservable(self) -> bool:
         """Rule 1: AVAILABLE + complete + all usable."""
-        raise NotImplementedError
+        return self.status == KitStatusTag.AVAILABLE and self.is_complete() and self.all_usable()
 
     @property
     def status(self) -> KitStatusTag:
-        raise NotImplementedError
+        return self._state.tag
 
     # ---- transitions (delegate to current state) ----
     def reserve(self) -> None:
-        raise NotImplementedError
+        self._state.reserve(self)
 
     def checkout(self) -> None:
-        raise NotImplementedError
+        self._state.checkout(self)
 
     def mark_returned(self) -> None:
-        raise NotImplementedError
+        self._state.mark_returned(self)
 
     def pass_inspection(self) -> None:
-        raise NotImplementedError
+        self._state.pass_inspection(self)
 
     def fail_inspection(self) -> None:
-        raise NotImplementedError
+        self._state.fail_inspection(self)
 
     def restore(self) -> None:
-        raise NotImplementedError
+        self._state.restore(self)
 
     def release(self) -> None:
         """Release a soft hold: RESERVED -> AVAILABLE (used by pending-expiry cron)."""
-        raise NotImplementedError
+        self._state.release(self)
 
     def retire(self) -> None:
         raise NotImplementedError
@@ -74,7 +74,7 @@ class EventKit:
         raise NotImplementedError
 
     def _set_state(self, state: "KitState") -> None:
-        raise NotImplementedError
+        self._state = state
 
 
 class EventKitBuilder:
